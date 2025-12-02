@@ -6,7 +6,9 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Settings from './pages/Settings';
 import LayoutAdmin from './components/LayoutAdmin';
-
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./redux/store";
 
 const router = createBrowserRouter([
   {
@@ -23,12 +25,18 @@ const router = createBrowserRouter([
       { path: "/settings", element: <Settings/> }
     ]
   },
-    { path: "/register", element: <Register /> },
-      { path: "/login", element: <Login /> }
+  { path: "/register", element: <Register /> },
+  { path: "/login", element: <Login /> }
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <RouterProvider router={router} />
+      </PersistGate>
+    </Provider>
+  );
 };
 
 export default App;

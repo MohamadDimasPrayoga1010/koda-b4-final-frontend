@@ -1,5 +1,5 @@
 import { Link2, Mail, Lock } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import InputField from "../components/InputField";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -7,6 +7,8 @@ import { schema } from "../utils/schemaLogin";
 import GoogleIcon from "../assets/images/google.svg";
 import { Link, useNavigate } from "react-router-dom";
 import Alert from "../components/Alert";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../redux/reducer/auth";
 
 const Login = () => {
   const {
@@ -14,15 +16,14 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
     reset,
-    setError,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
-
   const [alert, setAlert] = useState({
     type: "success",
     message: "",
@@ -30,44 +31,52 @@ const Login = () => {
 
   const closeAlert = () => setAlert({ ...alert, message: "" });
 
-  const onSubmit = async (data) => {
-    try {
-      const res = await fetch("http://localhost:8082/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+const onSubmit = async (data) => {
+  try {
+    const res = await fetch("http://localhost:8082/api/v1/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-      const result = await res.json();
+    const result = await res.json();
 
-      if (!res.ok) {
-        setAlert({
-          type: "error",
-          message: result.message || "Login gagal",
-        });
-        return;
-      }
-
-      setAlert({
-        type: "success",
-        message: "Login berhasil!",
-      });
-
-      localStorage.setItem("token", result.data.token);
-
-      setTimeout(() => {
-        navigate("/settings"); 
-      }, 800);
-
-      reset();
-
-    } catch (error) {
+    if (!res.ok) {
       setAlert({
         type: "error",
-        message: "Terjadi kesalahan server",
+        message: result.message || "Login gagal",
       });
+      return;
     }
-  };
+
+    setAlert({
+      type: "success",
+      message: "Login berhasil!",
+    });
+
+
+    dispatch(
+      loginSuccess({
+        token: result.data.token,              
+        refreshToken: result.data.refreshToken, 
+        user: result.data.user,
+      })
+    );
+
+    setTimeout(() => {
+      navigate("/settings");
+    }, 800);
+
+    reset();
+
+  } catch (error) {
+    setAlert({
+      type: "error",
+      message: "Terjadi kesalahan server",
+    });
+  }
+};
+
 
   return (
     <main className="min-h-screen flex justify-center items-center my-6 px-4 sm:px-6">

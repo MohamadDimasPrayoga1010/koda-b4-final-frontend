@@ -5,10 +5,11 @@ import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Settings from './pages/Settings';
-import LayoutAdmin from './components/LayoutAdmin';
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "./redux/store";
+import Links from './pages/Links';
+import Dashboard from './pages/Dashboard';
 
 const router = createBrowserRouter([
   {
@@ -16,15 +17,12 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "/", element: <LandingPage /> },
+      { path: "/settings", element: <Settings/> },
+      {path: "/links", element: <Links />},
+      {path: "/dashboard", element: <Dashboard />}
     ]
   },
-  {
-    path: "/",
-    element: <LayoutAdmin />,
-    children: [
-      { path: "/settings", element: <Settings/> }
-    ]
-  },
+  
   { path: "/register", element: <Register /> },
   { path: "/login", element: <Login /> }
 ]);

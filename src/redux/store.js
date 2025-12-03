@@ -1,18 +1,17 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { persistStore, persistReducer, createTransform } from "redux-persist";
+import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import rootReducer from "./reducer";
+import authReducer from "./reducer/auth"; 
+import { combineReducers } from "@reduxjs/toolkit";
 
-const saveRefreshOnly = createTransform(
-  (inboundState, key) => ({ refreshToken: inboundState.refreshToken }),
-  (outboundState, key) => ({ ...inboundState, ...outboundState }) 
-);
+const rootReducer = combineReducers({
+  auth: authReducer,
+});
 
 const persistConfig = {
-  key: "auth",
+  key: "root",
   storage,
   whitelist: ["auth"], 
-  transforms: [saveRefreshOnly], 
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -21,7 +20,7 @@ export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, 
+      serializableCheck: false,
     }),
 });
 

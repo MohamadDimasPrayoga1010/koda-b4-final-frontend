@@ -7,7 +7,7 @@ import { schema } from "../utils/schemaLogin";
 import GoogleIcon from "../assets/images/google.svg";
 import { Link, useNavigate } from "react-router-dom";
 import Alert from "../components/Alert";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../redux/reducer/auth";
 
 const Login = () => {
@@ -31,55 +31,56 @@ const Login = () => {
 
   const closeAlert = () => setAlert({ ...alert, message: "" });
 
-const onSubmit = async (data) => {
-  try {
-    const res = await fetch("http://localhost:8082/api/v1/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+  const onSubmit = async (data) => {
+    try {
+      const res = await fetch(
+        "http://localhost:8082/api/v1/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
 
-    const result = await res.json();
+      const result = await res.json();
 
-    if (!res.ok) {
+      if (!res.ok) {
+        setAlert({
+          type: "error",
+          message: result.message || "Login gagal",
+        });
+        return;
+      }
+
+      setAlert({
+        type: "success",
+        message: "Login berhasil!",
+      });
+
+      dispatch(
+        loginSuccess({
+          token: result.data.token,
+          refreshToken: result.data.refreshToken,
+          user: result.data.user,
+        })
+      );
+
+      setTimeout(() => {
+        navigate("/settings");
+      }, 800);
+
+      reset();
+    } catch (error) {
       setAlert({
         type: "error",
-        message: result.message || "Login gagal",
+        message: "Terjadi kesalahan server",
       });
-      return;
     }
-
-    setAlert({
-      type: "success",
-      message: "Login berhasil!",
-    });
-
-
-    dispatch(
-      loginSuccess({
-        token: result.data.token,              
-        refreshToken: result.data.refreshToken, 
-        user: result.data.user,
-      })
-    );
-
-    setTimeout(() => {
-      navigate("/settings");
-    }, 800);
-
-    reset();
-
-  } catch (error) {
-    setAlert({
-      type: "error",
-      message: "Terjadi kesalahan server",
-    });
-  }
-};
-
+  };
 
   return (
     <main className="min-h-screen flex justify-center items-center my-6 px-4 sm:px-6">
+      {" "}
       <Alert
         type={alert.type}
         message={alert.message}
@@ -104,8 +105,10 @@ const onSubmit = async (data) => {
         </div>
 
         <div className="w-full bg-white mt-5 max-h-full sm:max-h-[679px] px-4 sm:px-6 border border-gray-300 rounded-2xl">
-          <form className="flex flex-col gap-4 my-7" onSubmit={handleSubmit(onSubmit)}>
-
+          <form
+            className="flex flex-col gap-4 my-7"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <InputField
               type="email"
               name="email"

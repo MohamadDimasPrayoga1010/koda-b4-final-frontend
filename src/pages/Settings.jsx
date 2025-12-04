@@ -23,17 +23,21 @@ const Settings = () => {
 
   const [alert, setAlert] = useState({ type: "success", message: "" });
 
-  const fetchProfile = async () => {
+ const fetchProfile = async () => {
     if (!accessToken) return;
     setLoading(true);
     try {
       const data = await apiRequest("/profile", {}, accessToken);
       if (data.success && data.data.profile) {
+        const imageURL = data.data.profile.image 
+          ? `http://localhost:8083${data.data.profile.image}`
+          : null;
+        
         setProfileData({
           fullName: data.data.profile.fullname || "",
           email: data.data.profile.email || "",
           profilePhoto: null,
-          profilePhotoPreview: data.data.profile.image || null,
+          profilePhotoPreview: imageURL,
         });
       }
     } catch (err) {
@@ -228,7 +232,6 @@ const Settings = () => {
             </form>
           </div>
 
-          {/* Password Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-6">
               <Lock className="w-5 h-5 text-gray-700" />
